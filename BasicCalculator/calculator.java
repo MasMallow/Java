@@ -13,6 +13,7 @@ public class calculator {
         System.out.println("Choose (+, -, *, /): ");
         char operator = scanner.next().charAt(0);
 
+        scanner.close();
         double result = 0;
         switch (operator) {
             case '+':

@@ -41,10 +41,10 @@ public class ContactManagementGUI {
         frame.add(deleteButton);
         frame.add(editButton);
 
-        addButton.addActionListener(e -> addContact());
-        viewButton.addActionListener(e -> viewContacts());
+        addButton   .addActionListener(e -> addContact    ());
+        viewButton  .addActionListener(e -> viewContacts  ());
         deleteButton.addActionListener(e -> deleteContacts());
-        editButton.addActionListener(e -> editContacts());
+        editButton  .addActionListener(e -> editContacts  ());
         frame.setVisible(true);
     }
 
@@ -105,9 +105,11 @@ public class ContactManagementGUI {
                 String phone = rs.getString("phone");
                 String email = rs.getString("email");
 
-                contactsList.append(id).append(": ").append(name).append(" (Phone: ").append(phone).append(", Email: ").append(email).append(")\n");
+                contactsList.append(id).append(": ").append(name).append(" (Phone: ").append(phone).append(", Email: ")
+                        .append(email).append(")\n");
             }
-            String selectedContact = JOptionPane.showInputDialog(frame, "Select contact ID to delete:\n\n" + contactsList.toString());
+            String selectedContact = JOptionPane.showInputDialog(frame,
+                    "Select contact ID to delete:\n\n" + contactsList.toString());
             if (selectedContact != null && !selectedContact.trim().isEmpty()) {
                 int id = Integer.parseInt(selectedContact.trim());
                 String deleteQuery = "DELETE FROM contacts WHERE id = ?";
@@ -130,33 +132,33 @@ public class ContactManagementGUI {
     public void editContacts() {
         System.out.println("editContacts method called");
         try (Connection conn = DatabaseConnection.connect()) {
-            conn.setAutoCommit(false);  // Start transaction
-    
+            conn.setAutoCommit(false); // Start transaction
+
             // Fetch all contacts
             String query = "SELECT * FROM contacts";
             try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
-    
+                    ResultSet rs = stmt.executeQuery()) {
+
                 StringBuilder contactsList = new StringBuilder();
                 while (rs.next()) {
                     int id = rs.getInt("id");
                     String name = rs.getString("name");
                     String phone = rs.getString("phone");
                     String email = rs.getString("email");
-    
+
                     contactsList.append(id).append(": ").append(name)
-                                .append(" (Phone: ").append(phone)
-                                .append(", Email: ").append(email).append(")\n");
+                            .append(" (Phone: ").append(phone)
+                            .append(", Email: ").append(email).append(")\n");
                 }
-    
+
                 // Ask user to select a contact to edit
-                String selectedContact = JOptionPane.showInputDialog(frame, 
-                    "Select contact ID to edit:\n\n" + contactsList.toString());
+                String selectedContact = JOptionPane.showInputDialog(frame,
+                        "Select contact ID to edit:\n\n" + contactsList.toString());
                 System.out.println("Selected contact ID: " + selectedContact);
-    
+
                 if (selectedContact != null && !selectedContact.trim().isEmpty()) {
                     int id = Integer.parseInt(selectedContact.trim());
-    
+
                     // Fetch the selected contact details
                     String fetchQuery = "SELECT * FROM contacts WHERE id = ?";
                     try (PreparedStatement fetchStmt = conn.prepareStatement(fetchQuery)) {
@@ -166,11 +168,11 @@ public class ContactManagementGUI {
                                 String currentName = contactDetails.getString("name");
                                 String currentPhone = contactDetails.getString("phone");
                                 String currentEmail = contactDetails.getString("email");
-    
+
                                 // Create edit dialog
                                 JDialog editDialog = new JDialog(frame, "Edit Contact", true);
                                 editDialog.setLayout(new GridLayout(4, 2));
-    
+
                                 JLabel nameLabel = new JLabel("Name: ");
                                 JTextField nameEditField = new JTextField(currentName);
                                 JLabel phoneLabel = new JLabel("Phone: ");
@@ -178,7 +180,7 @@ public class ContactManagementGUI {
                                 JLabel emailLabel = new JLabel("Email: ");
                                 JTextField emailEditField = new JTextField(currentEmail);
                                 JButton okButton = new JButton("OK");
-    
+
                                 editDialog.add(nameLabel);
                                 editDialog.add(nameEditField);
                                 editDialog.add(phoneLabel);
@@ -187,7 +189,7 @@ public class ContactManagementGUI {
                                 editDialog.add(emailEditField);
                                 editDialog.add(new JLabel());
                                 editDialog.add(okButton);
-    
+
                                 // OK button action listener
                                 okButton.addActionListener(new ActionListener() {
                                     @Override
@@ -200,36 +202,39 @@ public class ContactManagementGUI {
                                                 updateStmt.setString(2, phoneEditField.getText());
                                                 updateStmt.setString(3, emailEditField.getText());
                                                 updateStmt.setInt(4, id);
-    
+
                                                 int rowsAffected = updateStmt.executeUpdate();
                                                 if (rowsAffected > 0) {
-                                                    conn.commit();  // Commit transaction
-                                                    JOptionPane.showMessageDialog(editDialog, "Contact updated successfully!");
+                                                    conn.commit(); // Commit transaction
+                                                    JOptionPane.showMessageDialog(editDialog,
+                                                            "Contact updated successfully!");
                                                     editDialog.dispose();
                                                 } else {
-                                                    conn.rollback();  // Rollback if no update occurred
-                                                    JOptionPane.showMessageDialog(editDialog, "Failed to update contact!");
+                                                    conn.rollback(); // Rollback if no update occurred
+                                                    JOptionPane.showMessageDialog(editDialog,
+                                                            "Failed to update contact!");
                                                 }
                                             }
                                         } catch (SQLException ex) {
                                             try {
-                                                conn.rollback();  // Rollback on exception
+                                                conn.rollback(); // Rollback on exception
                                             } catch (SQLException rollbackEx) {
                                                 rollbackEx.printStackTrace();
                                             }
-                                            JOptionPane.showMessageDialog(editDialog, "Database error: " + ex.getMessage());
+                                            JOptionPane.showMessageDialog(editDialog,
+                                                    "Database error: " + ex.getMessage());
                                             ex.printStackTrace();
                                         }
                                     }
                                 });
-    
+
                                 // Debug: Check if ActionListener is attached
                                 if (okButton.getActionListeners().length > 0) {
                                     System.out.println("OK button has ActionListener attached.");
                                 } else {
                                     System.out.println("Warning: OK button has no ActionListener!");
                                 }
-    
+
                                 // Additional mouse listener for debugging
                                 okButton.addMouseListener(new MouseAdapter() {
                                     @Override
@@ -237,7 +242,7 @@ public class ContactManagementGUI {
                                         System.out.println("OK button mouse clicked!");
                                     }
                                 });
-    
+
                                 editDialog.setSize(300, 200);
                                 editDialog.setLocationRelativeTo(frame);
                                 System.out.println("Edit dialog created and about to be shown.");

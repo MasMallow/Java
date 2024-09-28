@@ -32,5 +32,6 @@ public class ContactManagement {
         InnerContact contact = new InnerContact(name, phone, email);
 
         contact.displayContact();
+        scanner.close();
     }
 }
